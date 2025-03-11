@@ -54,6 +54,9 @@ const closeWorldSelection = document.querySelector('.close-world-selection')
 const worldNameInput = document.querySelector('#worldNameInput')
 const selectedWorldName = document.querySelector('#selectedWorldName')
 
+// Add references to the seed display
+const seedDisplay = document.querySelector('#seed-value')
+
 // Game state
 let game = new Game(
 	Start,
@@ -103,6 +106,9 @@ function startNewGame(worldName, seed = null) {
 
 	// Start auto-save
 	SaveManager.startAutoSave()
+
+	// Update seed display
+	updateSeedDisplay(worldData.seed)
 
 	// Close the start screen and go fullscreen
 	closeStartScreen()
@@ -213,6 +219,10 @@ function loadSavedGame(worldId) {
 	// Load the saved world
 	if (SaveManager.loadWorld(worldId)) {
 		SaveManager.showNotification('Game loaded successfully!')
+
+		// Update seed display
+		const worldManager = WorldManager.getInstance()
+		updateSeedDisplay(worldManager.worldSeed)
 	} else {
 		SaveManager.showNotification('Failed to load game')
 		return
@@ -237,6 +247,13 @@ function closeStartScreen() {
 		element.mozRequestFullScreen()
 	} else if (element.msRequestFullscreen) {
 		element.msRequestFullscreen()
+	}
+}
+
+// Function to update the seed display
+function updateSeedDisplay(seed) {
+	if (seedDisplay) {
+		seedDisplay.textContent = seed || 'N/A'
 	}
 }
 

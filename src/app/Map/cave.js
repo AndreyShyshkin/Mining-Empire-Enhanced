@@ -2,10 +2,10 @@ import { Cave } from '../Entities/Cave'
 import { Tile } from '../Entities/Tile'
 import { Images } from '../Graphics/Images'
 import { SceneManager } from '../Logic/SceneManager'
-import { Vector2 } from '../Math/Vector2'
-import { EntityTypes } from '../Physics/EntityTypes'
 import { WorldManager } from '../Logic/WorldManager'
 import { WorldMap } from '../Logic/WorldMap'
+import { Vector2 } from '../Math/Vector2'
+import { EntityTypes } from '../Physics/EntityTypes'
 
 // Create a world manager instance for tracking world changes
 const worldManager = WorldManager.getInstance()
@@ -234,12 +234,29 @@ function lvl1_grass(SceneManager, x, y, Hp) {
 function chest(SceneManager, x, y) {
 	const layer = SceneManager.Instance.mine.TC.GetLayer(y)
 	if (layer) {
+		// First add the background appropriate for this depth
+		const bgImageName = worldMap.getBackgroundForDepth(y)
+		const bgImage = Images[bgImageName]
+
+		// Add background tile first
+		layer.push(
+			new Tile(
+				new Vector2(0 + 100 * x, 100 * y),
+				new Vector2(100, 100),
+				bgImage,
+				1, // Layer 1 for background
+				EntityTypes.BackGroundTile,
+				SceneManager.Instance.mine
+			)
+		)
+
+		// Then add chest on top
 		layer.push(
 			new Tile(
 				new Vector2(0 + 100 * x, 100 * y),
 				new Vector2(100, 100),
 				Images.chest,
-				2,
+				2, // Layer 2 for chest
 				EntityTypes.BackGroundTile,
 				SceneManager.Instance.mine
 			)
@@ -252,12 +269,29 @@ function chest(SceneManager, x, y) {
 function cross(SceneManager, x, y) {
 	const layer = SceneManager.Instance.mine.TC.GetLayer(y)
 	if (layer) {
+		// First add the background appropriate for this depth
+		const bgImageName = worldMap.getBackgroundForDepth(y)
+		const bgImage = Images[bgImageName]
+
+		// Add background tile first
+		layer.push(
+			new Tile(
+				new Vector2(0 + 100 * x, 100 * y),
+				new Vector2(100, 100),
+				bgImage,
+				1, // Layer 1 for background
+				EntityTypes.BackGroundTile,
+				SceneManager.Instance.mine
+			)
+		)
+
+		// Then add cross decoration on top
 		layer.push(
 			new Tile(
 				new Vector2(0 + 100 * x, 100 * y),
 				new Vector2(100, 100),
 				Images.cross,
-				2,
+				2, // Layer 2 for decoration
 				EntityTypes.BackGroundTile,
 				SceneManager.Instance.mine
 			)

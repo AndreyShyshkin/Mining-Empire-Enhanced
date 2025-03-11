@@ -816,3 +816,17 @@ canvas {
 	background-color: rgba(255, 255, 255, 0.8);
 	margin-bottom: 15px;
 }
+
+/* Seed display in bottom left */
+.seed-display {
+	position: fixed;
+	bottom: 20px;
+	left: 20px;
+	color: white;
+	font-size: 16px;
+	background-color: rgba(0, 0, 0, 0.5);
+	padding: 8px 12px;
+	border-radius: 5px;
+	z-index: 9999;
+	pointer-events: none;
+}

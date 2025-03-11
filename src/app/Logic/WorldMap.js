@@ -1,5 +1,4 @@
 import { SeedGenerator } from './SeedGenerator'
-import { Images } from '../Graphics/Images'
 
 /**
  * WorldMap class caches the generated world based on seed
