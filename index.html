@@ -139,7 +139,78 @@
 				the Start Game button, the game will start and a full-scale screen will
 				open, to exit it, press "F11" or "ESC"
 			</p>
-			<button id="startGame">Start Game</button>
+
+			<!-- REPLACE THE SINGLE START GAME BUTTON WITH NEW OPTIONS -->
+			<div class="game-start-options">
+				<button id="newGameBtn" class="start-option-button">New Game</button>
+				<button
+					id="loadGameBtn"
+					class="start-option-button"
+					id="loadSaveStartBtn"
+				>
+					Load Game
+				</button>
+			</div>
+
+			<!-- New Game Seed Popup -->
+			<div id="newGamePopup" class="popup">
+				<div class="popup-content seed-popup-content">
+					<span class="close-popup">&times;</span>
+					<h2>Start New Game</h2>
+					<div class="seed-input-container">
+						<label for="worldNameInput">World Name:</label>
+						<input
+							type="text"
+							id="worldNameInput"
+							placeholder="Enter world name"
+							required
+						/>
+					</div>
+					<div class="seed-input-container">
+						<label for="seedInput">Enter Seed (Optional):</label>
+						<input
+							type="text"
+							id="seedInput"
+							placeholder="Leave empty for random seed"
+						/>
+					</div>
+					<div class="popup-buttons">
+						<button id="startWithSeed" class="popup-button">Start Game</button>
+						<button class="popup-button cancel-seed">Cancel</button>
+					</div>
+				</div>
+			</div>
+
+			<!-- Replace the existing load game popup with a new world selection popup -->
+			<div class="world-selection-popup" id="worldSelectionPopup">
+				<div class="world-selection-content">
+					<span class="close-world-selection">&times;</span>
+					<h2>Select World</h2>
+					<div class="worlds-list" id="worldsList">
+						<!-- World entries will be added dynamically -->
+					</div>
+					<div class="no-worlds-message" id="noWorldsMessage">
+						No saved worlds found.
+					</div>
+				</div>
+			</div>
+
+			<!-- Existing load game confirmation popup can remain but is modified -->
+			<div class="save-popup" id="loadSaveStartPopup">
+				<div class="save-popup-content">
+					<h2>Load Selected World</h2>
+					<p>
+						Do you want to load <span id="selectedWorldName">this world</span>?
+					</p>
+					<div class="save-info" id="saveStartTimestamp"></div>
+					<div class="save-popup-buttons">
+						<button id="loadSaveStartConfirm" class="save-popup-button confirm">
+							Yes, Load Game
+						</button>
+						<button class="save-popup-button cancel">Cancel</button>
+					</div>
+				</div>
+			</div>
 		</div>
 		<div id="game">
 			<div id="UI">
@@ -183,7 +254,33 @@
 				<div class="notification">
 					<p></p>
 				</div>
+
+				<!-- Replace save controls with settings button -->
+				<div class="settings-button">Настройки</div>
 			</div>
+
+			<!-- Settings Popup -->
+			<div class="settings-popup">
+				<div class="settings-popup-content">
+					<span class="close-settings">&times;</span>
+					<h2>Настройки</h2>
+					<div class="settings-options">
+						<div class="main-menu-button">В главное меню</div>
+						<div class="auto-save-toggle">Автосохранение: ВКЛ</div>
+						<div class="save-button">Сохранить</div>
+					</div>
+				</div>
+			</div>
+
+			<!-- Keep the existing popups but hide load/delete buttons -->
+			<div class="save-popup" id="deleteSavePopup" style="display: none">
+				<!-- ...existing content... -->
+			</div>
+
+			<div class="save-popup" id="loadSavePopup" style="display: none">
+				<!-- ...existing content... -->
+			</div>
+
 			<div class="market">
 				<div class="selector">
 					<div class="sell">Sell</div>
