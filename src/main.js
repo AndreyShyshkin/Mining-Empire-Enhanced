@@ -19,6 +19,39 @@ let res4 = document.querySelector('.res4')
 let res5 = document.querySelector('.res5')
 let res6 = document.querySelector('.res6')
 
+// Popup elements
+const controlsBtn = document.querySelector('#controlsBtn')
+const resourcesBtn = document.querySelector('#resourcesBtn')
+const controlsPopup = document.querySelector('#controlsPopup')
+const resourcesPopup = document.querySelector('#resourcesPopup')
+const closeButtons = document.querySelectorAll('.close-popup')
+
+// Popup event listeners
+controlsBtn.addEventListener('click', () => {
+	controlsPopup.style.display = 'flex'
+})
+
+resourcesBtn.addEventListener('click', () => {
+	resourcesPopup.style.display = 'flex'
+})
+
+closeButtons.forEach(button => {
+	button.addEventListener('click', () => {
+		controlsPopup.style.display = 'none'
+		resourcesPopup.style.display = 'none'
+	})
+})
+
+// Close popup when clicking outside of it
+window.addEventListener('click', event => {
+	if (event.target === controlsPopup) {
+		controlsPopup.style.display = 'none'
+	}
+	if (event.target === resourcesPopup) {
+		resourcesPopup.style.display = 'none'
+	}
+})
+
 let game = new Game(
 	Start,
 	Update,

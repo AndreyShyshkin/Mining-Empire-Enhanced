@@ -358,3 +358,65 @@ canvas {
 	color: white;
 	display: none;
 }
+
+/* Start Screen Popup Styles */
+.start-buttons {
+	display: flex;
+	justify-content: center;
+	gap: 2rem;
+	margin: 1rem 0;
+}
+
+.popup-button {
+	display: inline-block;
+	font-size: 30px;
+	background-color: goldenrod;
+	border: 5px solid sienna;
+	border-radius: 20px;
+	padding: 10px 20px;
+	cursor: pointer;
+	transition: background-color 0.3s;
+}
+
+.popup-button:hover {
+	background-color: #daa520;
+}
+
+.popup {
+	display: none;
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background-color: rgba(0, 0, 0, 0.7);
+	z-index: 1000;
+	justify-content: center;
+	align-items: center;
+}
+
+.popup-content {
+	position: relative;
+	background-image: url('./assets/img/bg.png');
+	border: 5px solid sienna;
+	border-radius: 15px;
+	width: 80%;
+	max-width: 1000px;
+	max-height: 80vh;
+	overflow-y: auto;
+	padding: 20px;
+}
+
+.close-popup {
+	position: absolute;
+	top: 10px;
+	right: 20px;
+	font-size: 40px;
+	font-weight: bold;
+	color: white;
+	cursor: pointer;
+}
+
+.close-popup:hover {
+	color: goldenrod;
+}
