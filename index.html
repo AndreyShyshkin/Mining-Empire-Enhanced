@@ -5,6 +5,7 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<title>Mining Empire Enhanced</title>
 		<link rel="stylesheet" href="src/style.css" />
+		<link rel="stylesheet" href="src/standalone-popup.css" />
 		<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
 		<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
 		<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
@@ -13,6 +14,15 @@
 	<body>
 		<div class="startScreen">
 			<h1>Mining Empire Enhanced</h1>
+
+			<!-- Add auth button to the top right corner -->
+			<div class="auth-container">
+				<button id="authButton" class="auth-button">Login / Register</button>
+				<div class="user-profile" style="display: none">
+					<span class="username">User</span>
+					<button id="friendsButton" class="friends-button">Friends</button>
+				</div>
+			</div>
 
 			<div class="start-buttons">
 				<button id="controlsBtn" class="popup-button">Controls</button>
@@ -150,6 +160,9 @@
 				>
 					Load Game
 				</button>
+				<button id="onlineGameBtn" class="start-option-button">
+					Play Online
+				</button>
 			</div>
 
 			<!-- New Game Seed Popup -->
@@ -208,6 +221,178 @@
 							Yes, Load Game
 						</button>
 						<button class="save-popup-button cancel">Cancel</button>
+					</div>
+				</div>
+			</div>
+
+			<!-- Online World Selection Popup -->
+			<div id="onlineWorldSelectionPopup" class="popup">
+				<div class="popup-content world-selection-content">
+					<span class="close-popup close-online-world-selection">&times;</span>
+					<h2>Select World for Online Play</h2>
+					<div class="worlds-list" id="onlineWorldsList">
+						<!-- World entries will be added dynamically -->
+					</div>
+					<div class="no-worlds-message" id="noOnlineWorldsMessage">
+						No worlds found. Create a new world first.
+					</div>
+				</div>
+			</div>
+
+			<!-- Friend Invitation Popup -->
+			<div id="inviteFriendsPopup" class="popup">
+				<div class="popup-content invite-popup-content">
+					<span class="close-popup close-invite">&times;</span>
+					<h2>Invite Friends to Play</h2>
+					<div class="friends-container">
+						<div class="no-friends-message" id="noInviteFriendsMessage">
+							Loading friends list...
+						</div>
+						<ul class="invite-friends-list"></ul>
+					</div>
+				</div>
+			</div>
+
+			<!-- Invitation Received Popup -->
+			<div id="invitationReceivedPopup" class="popup">
+				<div class="popup-content invitation-popup-content">
+					<span class="close-popup close-invitation">&times;</span>
+					<h2>Game Invitation</h2>
+					<p><span id="inviterName">Someone</span> has invited you to play!</p>
+					<!-- World name will be added here dynamically -->
+					<div class="invitation-buttons">
+						<button id="acceptInvitationBtn" class="invitation-button accept">
+							Accept
+						</button>
+						<button id="declineInvitationBtn" class="invitation-button decline">
+							Decline
+						</button>
+					</div>
+				</div>
+			</div>
+
+			<!-- Authentication popup -->
+			<div id="authPopup" class="popup">
+				<div class="popup-content auth-popup-content">
+					<span class="close-popup close-auth">&times;</span>
+					<h2 id="authTitle">Login</h2>
+
+					<div class="auth-form">
+						<div class="form-group">
+							<label for="emailInput">Email:</label>
+							<input
+								type="email"
+								id="emailInput"
+								placeholder="Enter your email"
+								required
+							/>
+						</div>
+						<div class="form-group">
+							<label for="passwordInput">Password:</label>
+							<input
+								type="password"
+								id="passwordInput"
+								placeholder="Enter your password"
+								required
+							/>
+						</div>
+						<div class="auth-error" id="authError"></div>
+						<div class="auth-buttons">
+							<button id="loginButton" class="auth-submit-button">Login</button>
+							<button
+								id="registerButton"
+								class="auth-submit-button"
+								style="display: none"
+							>
+								Register
+							</button>
+							<button id="googleAuthButton" class="google-auth-button">
+								<img
+									src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
+									alt="Google"
+								/>
+								Sign in with Google
+							</button>
+						</div>
+						<div class="auth-toggle">
+							<span id="toggleToRegister">Don't have an account? Register</span>
+							<span id="toggleToLogin" style="display: none"
+								>Already have an account? Login</span
+							>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<!-- Friends Popup -->
+			<div id="friendsPopup" class="popup">
+				<div class="popup-content friends-popup-content">
+					<span class="close-popup close-friends">&times;</span>
+					<h2>Friends</h2>
+
+					<div class="friends-tabs">
+						<button class="friends-tab-button active" data-tab="friends-list">
+							My Friends
+						</button>
+						<button class="friends-tab-button" data-tab="friend-requests">
+							Requests
+						</button>
+						<button class="friends-tab-button" data-tab="find-friends">
+							Find Users
+						</button>
+					</div>
+
+					<div class="friends-tab-content active" id="friends-list">
+						<div class="friends-container">
+							<div class="no-friends-message">
+								You don't have any friends yet.
+							</div>
+							<ul class="friends-list"></ul>
+						</div>
+					</div>
+
+					<div class="friends-tab-content" id="friend-requests">
+						<div class="requests-tabs">
+							<button
+								class="request-tab-button active"
+								data-tab="incoming-requests"
+							>
+								Incoming
+							</button>
+							<button class="request-tab-button" data-tab="outgoing-requests">
+								Sent
+							</button>
+						</div>
+
+						<div class="requests-tab-content active" id="incoming-requests">
+							<div class="no-requests-message">
+								No incoming friend requests.
+							</div>
+							<ul class="incoming-requests-list"></ul>
+						</div>
+
+						<div class="requests-tab-content" id="outgoing-requests">
+							<div class="no-requests-message">
+								No outgoing friend requests.
+							</div>
+							<ul class="outgoing-requests-list"></ul>
+						</div>
+					</div>
+
+					<div class="friends-tab-content" id="find-friends">
+						<div class="search-container">
+							<input
+								type="text"
+								id="friend-search"
+								placeholder="Search by email or username"
+							/>
+							<button id="search-button">Search</button>
+						</div>
+
+						<div class="search-results">
+							<div class="no-results-message">No users found.</div>
+							<ul class="search-results-list"></ul>
+						</div>
 					</div>
 				</div>
 			</div>
