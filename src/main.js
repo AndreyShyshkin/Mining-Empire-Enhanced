@@ -19,6 +19,7 @@ import {
 	onAuthStateChanged,
 	signInWithEmailAndPassword,
 	signInWithPopup,
+	signOut,
 } from 'firebase/auth'
 import {
 	ref as dbRef,
@@ -63,6 +64,7 @@ const res6 = document.querySelector('.res6')
 const authButton = document.querySelector('#authButton')
 const userProfile = document.querySelector('.user-profile')
 const username = document.querySelector('.username')
+const logoutButton = document.querySelector('#logoutButton')
 const authPopup = document.querySelector('#authPopup')
 const authTitle = document.querySelector('#authTitle')
 const emailInput = document.querySelector('#emailInput')
@@ -862,6 +864,22 @@ googleAuthButton.addEventListener('click', () => {
 		.catch(error => {
 			// Show error message
 			authError.textContent = getAuthErrorMessage(error.code)
+		})
+})
+
+// Logout event listener
+logoutButton.addEventListener('click', () => {
+	signOut(auth)
+		.then(() => {
+			// Logout successful
+			authButton.style.display = 'block'
+			userProfile.style.display = 'none'
+			SaveManager.showNotification('Logged out successfully')
+		})
+		.catch(error => {
+			// Show error message
+			SaveManager.showNotification('Failed to log out')
+			console.error('Logout error:', error)
 		})
 })
 
