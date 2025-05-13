@@ -170,6 +170,29 @@ export class WorldManager {
 
 		this.worldChanges.brokenBlocks[key] = true
 		console.log(`Marked block broken at ${gridX},${gridY} (key: ${key})`)
+
+		// Notify any active multiplayer session about world change
+		this.notifyWorldChange({
+			type: 'blockBroken',
+			position: { x: gridX, y: gridY },
+			key: key,
+		})
+	}
+
+	// Notify about world changes for multiplayer synchronization
+	notifyWorldChange(change) {
+		// Find the active GameSynchronizer instance if it exists
+		const gameSynchronizer = window.gameSynchronizer
+
+		// If there's an active online game, send update to other players
+		if (gameSynchronizer && gameSynchronizer.isActive) {
+			console.log('Sending world change to other players:', change)
+			gameSynchronizer.updateWorldState({
+				[change.type]: {
+					[change.key]: change,
+				},
+			})
+		}
 	}
 
 	// Check if a block is broken - ensure same coordinate handling
@@ -194,8 +217,17 @@ export class WorldManager {
 
 	// Mark a chest as opened
 	markChestOpened(x, y) {
-		const key = `${x},${y}`
+		const gridX = Math.floor(Number(x))
+		const gridY = Math.floor(Number(y))
+		const key = `${gridX},${gridY}`
 		this.worldChanges.openedChests[key] = true
+
+		// Notify multiplayer session
+		this.notifyWorldChange({
+			type: 'chestOpened',
+			position: { x: gridX, y: gridY },
+			key: key,
+		})
 	}
 
 	// Check if a chest is opened
@@ -206,9 +238,18 @@ export class WorldManager {
 
 	// Add a placed ladder - enhance with better debugging
 	addLadder(x, y) {
-		const key = `${x},${y}`
+		const gridX = Math.floor(Number(x))
+		const gridY = Math.floor(Number(y))
+		const key = `${gridX},${gridY}`
 		this.worldChanges.placedLadders[key] = true
-		console.log(`Ladder placed at ${x}, ${y}`)
+		console.log(`Ladder placed at ${gridX}, ${gridY}`)
+
+		// Notify multiplayer session
+		this.notifyWorldChange({
+			type: 'ladderPlaced',
+			position: { x: gridX, y: gridY },
+			key: key,
+		})
 	}
 
 	// Check if there's a ladder at position - enhance with better logging

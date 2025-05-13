@@ -1,5 +1,5 @@
-import { Scene } from './Scene'
 import cave from '../Map/cave'
+import { Scene } from './Scene'
 
 export class SceneManager {
 	town = new Scene()
@@ -16,7 +16,11 @@ export class SceneManager {
 	}
 
 	ChangeScene() {
-		if (Object.is(this.currentScene, this.town)) {
+		const newLocation = Object.is(this.currentScene, this.town)
+			? 'cave'
+			: 'village'
+
+		if (newLocation === 'cave') {
 			this.currentScene = this.mine
 			this.currentSceneType = 'mine'
 
@@ -30,14 +34,31 @@ export class SceneManager {
 			this.currentScene = this.town
 			this.currentSceneType = 'town'
 		}
-		console.log('Changed scene to:', this.currentSceneType)
+		console.log(
+			'Changed scene to:',
+			this.currentSceneType,
+			'with location:',
+			newLocation
+		)
+
+		// Dispatch a custom event so the GameSynchronizer can detect location changes
+		const event = new CustomEvent('locationChange', {
+			detail: { location: newLocation },
+		})
+		document.dispatchEvent(event)
 	}
 
 	SetScene(scene) {
+		const newLocation = scene === this.town ? 'village' : 'cave'
 		this.currentScene = scene
 		this.currentSceneType = scene === this.town ? 'town' : 'mine'
 
-		console.log('Set scene to:', this.currentSceneType)
+		console.log(
+			'Set scene to:',
+			this.currentSceneType,
+			'with location:',
+			newLocation
+		)
 
 		// Initialize mine if needed
 		if (scene === this.mine && !this.mineInitialized) {
@@ -45,6 +66,12 @@ export class SceneManager {
 			cave()
 			this.mineInitialized = true
 		}
+
+		// Dispatch a custom event so the GameSynchronizer can detect location changes
+		const event = new CustomEvent('locationChange', {
+			detail: { location: newLocation },
+		})
+		document.dispatchEvent(event)
 	}
 
 	// Reset scene initialization state (used when loading saves)

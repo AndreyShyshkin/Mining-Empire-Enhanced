@@ -30,6 +30,7 @@ import {
 	remove,
 	set,
 } from 'firebase/database'
+// Socket.io imports
 import { FriendsManager } from './app/Friends/FriendsManager'
 import { GameSynchronizer } from './app/Online/GameSynchronizer'
 
@@ -158,7 +159,8 @@ let invitationsRef = null
 let invitationListener = null
 
 // Add this to the global variables section
-let gameSynchronizer = null
+// Make the gameSynchronizer accessible globally for WorldManager
+window.gameSynchronizer = null
 
 // Game state
 let game = new Game(
@@ -319,7 +321,28 @@ function loadSavedGame(worldId) {
 	// Generate only the village initially - the cave will be regenerated when needed
 	village(SM.town.TC)
 
-	// Load the saved world
+	// If this is an online game and the world doesn't exist locally, we'll create it based on server data
+	if (isOnlineGame && !SaveManager.getAllWorlds()[worldId]) {
+		console.log('Creating new online world:', worldId)
+
+		// Create a basic world structure that will be filled in by the server
+		const worldManager = WorldManager.getInstance()
+		worldManager.newWorld() // This creates a temporary seed
+
+		// Initialize the game synchronizer to get data from server
+		window.gameSynchronizer = new GameSynchronizer(
+			auth.currentUser,
+			worldId,
+			player,
+			SM
+		)
+		window.gameSynchronizer.start().catch(console.error)
+
+		SaveManager.showNotification('Connected to online world')
+		return
+	}
+
+	// For local worlds or existing online worlds, load normally
 	if (SaveManager.loadWorld(worldId)) {
 		SaveManager.showNotification('Game loaded successfully!')
 
@@ -330,13 +353,13 @@ function loadSavedGame(worldId) {
 		// If online game, initialize the game synchronizer
 		if (isOnlineGame && auth.currentUser) {
 			console.log('Starting online game mode')
-			gameSynchronizer = new GameSynchronizer(
+			window.gameSynchronizer = new GameSynchronizer(
 				auth.currentUser,
 				worldId,
 				player,
 				SM
 			)
-			gameSynchronizer.start().catch(console.error)
+			window.gameSynchronizer.start().catch(console.error)
 		}
 	} else {
 		SaveManager.showNotification('Failed to load game')
@@ -1105,8 +1128,8 @@ window.onbeforeunload = function () {
 	}
 
 	// Clean up online game resources
-	if (gameSynchronizer) {
-		gameSynchronizer.cleanup()
+	if (window.gameSynchronizer) {
+		window.gameSynchronizer.cleanup()
 	}
 
 	return 'Are you sure?'
@@ -1157,8 +1180,10 @@ function Update() {
 		player.Draw(Canvas.Instance.GetLayerContext(player.Layer), Player.Camera)
 
 		// Draw other player names if in online mode
-		if (gameSynchronizer && gameSynchronizer.isActive) {
-			gameSynchronizer.drawPlayerNames(Canvas.Instance.GetLayerContext(3))
+		if (window.gameSynchronizer && window.gameSynchronizer.isActive) {
+			window.gameSynchronizer.drawPlayerNames(
+				Canvas.Instance.GetLayerContext(3)
+			)
 		}
 
 		money.innerHTML = resurse.money
@@ -1298,9 +1323,9 @@ function acceptInvitation() {
 		SaveManager.saveGame()
 
 		// Clean up any existing synchronizer
-		if (gameSynchronizer) {
-			gameSynchronizer.cleanup()
-			gameSynchronizer = null
+		if (window.gameSynchronizer) {
+			window.gameSynchronizer.cleanup()
+			window.gameSynchronizer = null
 		}
 	}
 
@@ -1323,8 +1348,45 @@ function acceptInvitation() {
 			// Hide the invitation popup
 			invitationReceivedPopup.style.display = 'none'
 
-			// Load the world
-			loadSavedGame(invitedWorldId)
+			// Since this is an online world we're joining, we don't need to load it first
+			// Instead, we'll create a basic game structure and let the server send us the world state
+			console.log('Joining online world:', invitedWorldId)
+
+			// Initialize the game if it hasn't been already
+			if (!player) {
+				initGame()
+			}
+
+			// Create the basic player setup
+			let playerImg = CreateImageByPath('./assets/img/player1.png')
+			player = new Player(
+				new Vector2(920, 500),
+				new Vector2(80, 80),
+				playerImg,
+				3,
+				Vector2.Zero,
+				SM
+			)
+
+			// Generate village
+			village(SM.town.TC)
+
+			// Set up scene
+			SM.SetScene(SM.town)
+
+			// Create a new GameSynchronizer for this world
+			window.gameSynchronizer = new GameSynchronizer(
+				auth.currentUser,
+				invitedWorldId,
+				player,
+				SM
+			)
+
+			// Start the synchronization which will get the world state from server
+			window.gameSynchronizer.start().catch(console.error)
+
+			// Close the start screen
+			closeStartScreen()
 
 			// Add invite button to settings
 			addInviteFriendButton()
@@ -1476,9 +1538,9 @@ mainMenuButton.addEventListener('click', () => {
 	}
 
 	// Clean up online game resources
-	if (gameSynchronizer) {
-		gameSynchronizer.cleanup()
-		gameSynchronizer = null
+	if (window.gameSynchronizer) {
+		window.gameSynchronizer.cleanup()
+		window.gameSynchronizer = null
 	}
 
 	// Reload the entire page - this ensures clean state
