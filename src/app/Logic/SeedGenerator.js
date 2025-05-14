@@ -3,8 +3,36 @@
  */
 export class SeedGenerator {
 	constructor(seed = null) {
-		// Use the provided seed or generate one
-		this.seed = seed || Math.floor(Math.random() * 2147483647)
+		// CRITICAL FIX: First check for a global seed that should be used
+		if (
+			(typeof seed !== 'number' || isNaN(seed)) &&
+			typeof window !== 'undefined' &&
+			typeof window.globalGameSeed === 'number'
+		) {
+			console.warn(
+				`SeedGenerator received invalid seed (${seed}), using global seed: ${window.globalGameSeed}`
+			)
+			seed = window.globalGameSeed
+		}
+
+		// Ensure we have a valid seed
+		if (typeof seed !== 'number' || isNaN(seed)) {
+			const generatedSeed = Math.floor(Math.random() * 2147483647)
+			console.warn(
+				`SeedGenerator: No valid seed provided, generating new seed: ${generatedSeed}`
+			)
+			seed = generatedSeed
+
+			// Update global seed if we had to generate a new one
+			if (typeof window !== 'undefined') {
+				window.globalGameSeed = seed
+				console.log(
+					`Updated missing global seed with newly generated seed: ${seed}`
+				)
+			}
+		}
+
+		this.seed = seed
 
 		// Create a separate random state for each level of generation
 		this._mainState = this.seed

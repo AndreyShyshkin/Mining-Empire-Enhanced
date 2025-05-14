@@ -35,8 +35,33 @@ export class WorldMap {
 	 */
 	initializeMap(seed) {
 		console.log(`Initializing world map with seed: ${seed}`)
+
+		// CRITICAL FIX: Validate seed to prevent inconsistent world generation
+		// If seed is invalid but global seed is available, use global seed
+		if (
+			(typeof seed !== 'number' || isNaN(seed)) &&
+			typeof window.globalGameSeed === 'number'
+		) {
+			console.warn(
+				`Invalid seed provided (${seed}), using global seed: ${window.globalGameSeed}`
+			)
+			seed = window.globalGameSeed
+		}
+
+		// Make sure we have a valid seed no matter what
+		if (typeof seed !== 'number' || isNaN(seed)) {
+			const emergencySeed = Math.floor(Math.random() * 2147483647)
+			console.error(
+				`No valid seed available! Using emergency seed: ${emergencySeed}`
+			)
+			seed = emergencySeed
+		}
+
 		this.worldSeed = seed
 		this.seedGenerator = new SeedGenerator(seed)
+
+		// Log verification to be sure we're using the correct seed
+		console.log(`VERIFICATION: WorldMap using seed: ${seed}`)
 
 		// Clear existing map data
 		this.mapData = {

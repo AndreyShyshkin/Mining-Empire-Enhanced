@@ -21,14 +21,66 @@ function cave() {
 		`Starting cave generation with ${brokenCount} broken blocks in save data`
 	)
 
-	// Initialize or use existing seed
-	if (!worldManager.worldSeed) {
-		worldManager.newWorld()
-		console.log('Created new world with seed:', worldManager.worldSeed)
+	// CRITICAL FIX WITH ENHANCED VALIDATION: Comprehensive seed check and synchronization
+	const globalSeed = window.globalGameSeed
+	let finalSeed = null
+
+	console.log('=== SEED VERIFICATION FOR CAVE GENERATION ===')
+	console.log(`- WorldManager seed: ${worldManager.worldSeed}`)
+	console.log(`- Global seed: ${globalSeed}`)
+	console.log(`- WorldMap seed: ${worldMap.worldSeed}`)
+	if (worldManager.seedGenerator) {
+		console.log(`- SeedGenerator seed: ${worldManager.seedGenerator.seed}`)
 	}
 
-	// Initialize the WorldMap with the seed
-	worldMap.initializeMap(worldManager.worldSeed)
+	// Determine which seed to use, prioritizing global seed for multiplayer consistency
+	if (typeof globalSeed === 'number' && !isNaN(globalSeed)) {
+		finalSeed = globalSeed
+		console.log(`Using global seed for consistency: ${finalSeed}`)
+	} else if (
+		worldManager.worldSeed &&
+		typeof worldManager.worldSeed === 'number'
+	) {
+		finalSeed = worldManager.worldSeed
+		console.log(`Using WorldManager seed: ${finalSeed}`)
+	} else {
+		// Emergency fallback - generate new seed
+		finalSeed = Math.floor(Math.random() * 2147483647)
+		console.warn(`No valid seed found! Generated emergency seed: ${finalSeed}`)
+	}
+
+	// Apply the final seed to all components
+	console.log(`Applying final seed ${finalSeed} to all components`)
+
+	// 1. Set WorldManager seed (this will also update global seed)
+	worldManager.setSeed(finalSeed)
+
+	// 2. Double-check global seed was updated
+	if (window.globalGameSeed !== finalSeed) {
+		console.warn(`Global seed not updated correctly! Fixing...`)
+		window.globalGameSeed = finalSeed
+	}
+
+	// 3. Force update the WorldMap with the final seed
+	worldMap.initializeMap(finalSeed)
+
+	// 4. Store in localStorage for recovery
+	try {
+		localStorage.setItem('mining-empire-seed', finalSeed.toString())
+		console.log(`Saved seed ${finalSeed} to localStorage`)
+	} catch (err) {
+		console.warn('Failed to save seed to localStorage:', err)
+	}
+
+	// FINAL VERIFICATION: Log all seeds to confirm synchronization
+	console.log(`=== FINAL SEED VERIFICATION ===`)
+	console.log(`- WorldManager seed: ${worldManager.worldSeed}`)
+	console.log(`- Global seed: ${window.globalGameSeed}`)
+	console.log(`- WorldMap seed: ${worldMap.worldSeed}`)
+	if (worldManager.seedGenerator) {
+		console.log(`- SeedGenerator seed: ${worldManager.seedGenerator.seed}`)
+	}
+	console.log(`Cave will be generated with seed: ${finalSeed}`)
 
 	// Clear existing entities to prevent duplicates
 	SceneManager.Instance.mine.Entities = []

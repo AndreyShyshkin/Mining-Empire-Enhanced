@@ -396,12 +396,79 @@ function closeStartScreen() {
 	}
 }
 
-// Function to update the seed display
+// Function to update the seed display - make it globally accessible
 function updateSeedDisplay(seed) {
-	if (seedDisplay) {
-		seedDisplay.textContent = seed || 'N/A'
+	// Make sure seed is a valid number
+	const validSeed = seed && !isNaN(Number(seed)) ? Number(seed) : null
+	const displayValue = validSeed !== null ? validSeed : 'N/A'
+
+	try {
+		// Update the global seed variable for consistency
+		if (validSeed !== null) {
+			window.globalGameSeed = validSeed
+
+			// Store in localStorage for recovery
+			try {
+				localStorage.setItem('mining-empire-seed', validSeed.toString())
+			} catch (err) {
+				console.warn('Failed to store seed in localStorage:', err)
+			}
+		}
+
+		// Update UI - try different methods for maximum compatibility
+		let updated = false
+
+		// Method 1: Using the seedDisplay variable
+		if (seedDisplay) {
+			seedDisplay.textContent = displayValue
+			updated = true
+		}
+
+		// Method 2: Using getElementById as fallback
+		if (!updated) {
+			const seedElement = document.getElementById('seed-value')
+			if (seedElement) {
+				seedElement.textContent = displayValue
+				updated = true
+			}
+		}
+
+		// Method 3: Create seed display if it doesn't exist
+		if (!updated) {
+			const gameContainer = document.querySelector('.game-container')
+			if (gameContainer) {
+				const seedDisplayDiv = document.createElement('div')
+				seedDisplayDiv.className = 'seed-display'
+				seedDisplayDiv.innerHTML = `Seed: <span id="seed-value">${displayValue}</span>`
+				seedDisplayDiv.style.position = 'absolute'
+				seedDisplayDiv.style.top = '10px'
+				seedDisplayDiv.style.right = '10px'
+				seedDisplayDiv.style.backgroundColor = 'rgba(0,0,0,0.7)'
+				seedDisplayDiv.style.color = 'white'
+				seedDisplayDiv.style.padding = '5px 10px'
+				seedDisplayDiv.style.borderRadius = '5px'
+				seedDisplayDiv.style.zIndex = '1000'
+				gameContainer.appendChild(seedDisplayDiv)
+				console.log('Created new seed display element:', displayValue)
+				updated = true
+			}
+		}
+
+		if (updated) {
+			console.log('Successfully updated seed display to:', displayValue)
+		} else {
+			console.warn('Failed to update seed display')
+		}
+
+		return updated
+	} catch (err) {
+		console.error('Error updating seed display:', err)
+		return false
 	}
 }
+
+// Make updateSeedDisplay globally available for GameSynchronizer to use
+window.updateSeedDisplay = updateSeedDisplay
 
 // Function to show online world selection
 function showOnlineWorldSelection() {

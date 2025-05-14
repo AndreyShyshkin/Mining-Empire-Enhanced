@@ -20,6 +20,28 @@ export class SceneManager {
 			? 'cave'
 			: 'village'
 
+		// CRITICAL FIX: Ensure consistent seed before scene change
+		if (typeof window.globalGameSeed === 'number' && this.WorldManager) {
+			const currentSeed = this.WorldManager.worldSeed
+			const globalSeed = window.globalGameSeed
+
+			// If seeds don't match, synchronize them before scene change
+			if (currentSeed !== globalSeed) {
+				console.log(
+					`SEED MISMATCH DETECTED! WorldManager: ${currentSeed}, Global: ${globalSeed}. Fixing...`
+				)
+				this.WorldManager.setSeed(globalSeed)
+
+				// Re-initialize world map with correct seed
+				if (this.WorldManager.worldMap) {
+					this.WorldManager.worldMap.initializeMap(globalSeed)
+					console.log(
+						`Re-initialized WorldMap with seed: ${globalSeed} before scene change`
+					)
+				}
+			}
+		}
+
 		if (newLocation === 'cave') {
 			this.currentScene = this.mine
 			this.currentSceneType = 'mine'
