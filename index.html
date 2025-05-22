@@ -4,577 +4,425 @@
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<title>Mining Empire Enhanced</title>
-		<link rel="stylesheet" href="src/style.css" />
-		<link rel="stylesheet" href="src/standalone-popup.css" />
-		<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
-		<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
-		<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
-		<link rel="manifest" href="/site.webmanifest" />
+		<link rel="stylesheet" href="style.css" />
+		<link rel="stylesheet" href="css/friends.css" />
+		<link rel="stylesheet" href="css/multiplayer.css" />
+		<link rel="stylesheet" href="css/inventory-tooltip.css" />
+		<link rel="stylesheet" href="css/settings-menu.css" />
+		<script type="module">
+			// Import the functions you need from the SDKs you need
+			import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.7.3/firebase-app.js'
+			import {
+				getAuth,
+				GoogleAuthProvider,
+				signInWithPopup,
+				createUserWithEmailAndPassword,
+				signInWithEmailAndPassword,
+				signOut,
+				onAuthStateChanged,
+				updateProfile,
+				updatePassword,
+				updateEmail,
+				reauthenticateWithCredential,
+				EmailAuthProvider,
+			} from 'https://www.gstatic.com/firebasejs/11.7.3/firebase-auth.js'
+			import {
+				getDatabase,
+				ref,
+				set,
+				get,
+				child,
+				update,
+				remove,
+				onValue,
+				onChildAdded,
+				onChildChanged,
+				onChildRemoved,
+				off,
+				onDisconnect,
+			} from 'https://www.gstatic.com/firebasejs/11.7.3/firebase-database.js'
+
+			// Your web app's Firebase configuration
+			const firebaseConfig = {
+				apiKey: 'AIzaSyDCYUHZa1XuEH1fky3WkgOkWdvH79TdfXE',
+				authDomain: 'mining-empire-enhanced.firebaseapp.com',
+				databaseURL:
+					'https://mining-empire-enhanced-default-rtdb.europe-west1.firebasedatabase.app',
+				projectId: 'mining-empire-enhanced',
+				storageBucket: 'mining-empire-enhanced.firebasestorage.app',
+				messagingSenderId: '287033597190',
+				appId: '1:287033597190:web:529a88526cef2040b05287',
+			}
+
+			// Initialize Firebase
+			const app = initializeApp(firebaseConfig)
+			const auth = getAuth(app)
+			const database = getDatabase(app)
+
+			// Export for other modules
+			window.firebaseApp = app
+			window.firebaseAuth = auth
+			window.firebaseDatabase = database
+			window.firebaseConfig = firebaseConfig
+			window.GoogleAuthProvider = GoogleAuthProvider
+			window.EmailAuthProvider = EmailAuthProvider
+			window.signInWithPopup = signInWithPopup
+			window.createUserWithEmailAndPassword = createUserWithEmailAndPassword
+			window.signInWithEmailAndPassword = signInWithEmailAndPassword
+			window.signOutFirebase = signOut
+			window.onAuthStateChanged = onAuthStateChanged
+			window.updateProfile = updateProfile
+			window.updatePassword = updatePassword
+			window.updateEmail = updateEmail
+			window.reauthenticateWithCredential = reauthenticateWithCredential
+			window.dbRef = ref
+			window.dbSet = set
+			window.dbGet = get
+			window.dbChild = child
+			window.dbUpdate = update
+			window.dbRemove = remove
+			window.dbOnValue = onValue
+			window.dbOnChildAdded = onChildAdded
+			window.dbOnChildChanged = onChildChanged
+			window.dbOnChildRemoved = onChildRemoved
+			window.dbOff = off
+			window.dbOnDisconnect = onDisconnect
+		</script>
 	</head>
 	<body>
-		<div class="startScreen">
-			<h1>Mining Empire Enhanced</h1>
+		<div id="authContainer" class="auth-container">
+			<div id="authForm">
+				<h2 id="authTitle">Login</h2>
+				<input type="email" id="emailInput" placeholder="Email" />
+				<input type="password" id="passwordInput" placeholder="Password" />
+				<button id="emailPasswordAuthButton">Login</button>
+				<button id="googleAuthButton">Login with Google</button>
+				<p id="authToggleText">
+					Don't have an account? <a href="#" id="toggleToRegister">Register</a>
+				</p>
+				<p id="authError" class="error-message"></p>
+			</div>
+			<div id="userInfo" style="display: none">
+				<p>Welcome, <span id="userName"></span>!</p>
+				<button id="profileButton" class="menu-button">Профиль</button>
+				<button id="logoutButton">Logout</button>
+			</div>
+		</div>
 
-			<!-- Add auth button to the top right corner -->
-			<div class="auth-container">
-				<button id="authButton" class="auth-button">Login / Register</button>
-				<div class="user-profile" style="display: none">
-					<span class="username">User</span>
-					<button id="friendsButton" class="friends-button">Friends</button>
-					<button id="logoutButton" class="logout-button">Logout</button>
+		<!-- Главный экран -->
+		<div id="mainMenu" class="main-menu">
+			<div class="menu-container">
+				<h1 class="game-title">Mining Empire Enhanced</h1>
+
+				<div class="user-panel">
+					<p id="menuUserName" class="user-welcome">Привет, гость</p>
 				</div>
-			</div>
 
-			<div class="start-buttons">
-				<button id="controlsBtn" class="popup-button">Controls</button>
-				<button id="resourcesBtn" class="popup-button">Resources</button>
-			</div>
-
-			<!-- Controls Popup -->
-			<div id="controlsPopup" class="popup">
-				<div class="popup-content">
-					<span class="close-popup">&times;</span>
-					<h2>Control</h2>
-					<div class="control">
-						<div class="wasd">
-							<img
-								src="./src/assets/img/Button/buttonWASD.png"
-								class="button"
-								alt="WASD"
-							/>
-							<p><b>Walking</b></p>
-						</div>
-						<div class="e">
-							<img
-								src="./src/assets/img/Button/buttonE.png"
-								class="button"
-								alt="E"
-							/>
-							<p><b>Using</b></p>
-						</div>
-						<div class="x">
-							<img
-								src="./src/assets/img/Button/buttonX.png"
-								class="button"
-								alt="X"
-							/>
-							<p><b>Creating a staircase</b></p>
-						</div>
-						<div class="k">
-							<div class="breaking">
-								<img
-									src="./src/assets/img/Button/buttonK.png"
-									class="button"
-									alt="K"
-								/>
-								<span>+</span>
-								<img
-									src="./src/assets/img/Button/buttonWASD.png"
-									class="button"
-									alt="WASD"
-								/>
-							</div>
-							<p><b>Breaking blocks</b></p>
-						</div>
-					</div>
+				<div class="menu-buttons">
+					<button id="newWorldBtn" class="menu-button">Новый мир</button>
+					<button id="loadWorldBtn" class="menu-button">Загрузить мир</button>
+					<button id="multiplayerBtn" class="menu-button">Мультиплеер</button>
+					<button id="friendsBtn" class="menu-button">Друзья</button>
+					<button id="settingsBtn" class="menu-button">Настройки</button>
+					<button id="profileMenuBtn" class="menu-button">Профиль</button>
+					<button id="logoutMenuBtn" class="menu-button warning">Выйти</button>
 				</div>
-			</div>
 
-			<!-- Resources Popup -->
-			<div id="resourcesPopup" class="popup">
-				<div class="popup-content">
-					<span class="close-popup">&times;</span>
-					<h2>Types of resources</h2>
-					<div class="resources">
-						<div class="coal">
-							<div class="resImg">
-								<img src="./src/assets/img/UI/Frame_res1.png" alt="res" /><img
-									src="./src/assets/img/Lvl1/lvl1_res1.png"
-									alt="res"
-								/>
-							</div>
-							<p>Coal</p>
-						</div>
-						<div class="iron">
-							<div class="resImg">
-								<img src="./src/assets/img/UI/Frame_res2.png" alt="res" /><img
-									src="./src/assets/img/Lvl1/lvl1_res2.png"
-									alt="res"
-								/>
-							</div>
-							<p>Iron</p>
-						</div>
-						<div class="gold">
-							<div class="resImg">
-								<img src="./src/assets/img/UI/Frame_res3.png" alt="res" /><img
-									src="./src/assets/img/Lvl2/lvl2_res3.png"
-									alt="res"
-								/>
-							</div>
-							<p>Gold</p>
-						</div>
-						<div class="tungsten">
-							<div class="resImg">
-								<img src="./src/assets/img/UI/Frame_res4.png" alt="res" /><img
-									src="./src/assets/img/Lvl3/lvl3_res4.png"
-									alt="res"
-								/>
-							</div>
-							<p>Tungsten</p>
-						</div>
-						<div class="titanium">
-							<div class="resImg">
-								<img src="./src/assets/img/UI/Frame_res5.png" alt="res" /><img
-									src="./src/assets/img/Lvl4/lvl4_res5.png"
-									alt="res"
-								/>
-							</div>
-							<p>Titanium</p>
-						</div>
-						<div class="jewel">
-							<div class="resImg">
-								<img src="./src/assets/img/UI/Frame_res6.png" alt="res" /><img
-									src="./src/assets/img/Lvl5/lvl5_res6.png"
-									alt="res"
-								/>
-							</div>
-							<p>Jewel</p>
-						</div>
+				<!-- Панель создания нового мира -->
+				<div id="newWorldPanel" class="menu-panel">
+					<h2>Создать новый мир</h2>
+					<div class="form-group">
+						<label for="worldName">Название мира:</label>
+						<input type="text" id="worldName" placeholder="Мой мир" />
 					</div>
-				</div>
-			</div>
-
-			<h2 class="warning">Warning</h2>
-			<p class="warningText">
-				For the best game, a full-scale screen will be used, when you click on
-				the Start Game button, the game will start and a full-scale screen will
-				open, to exit it, press "F11" or "ESC"
-			</p>
-
-			<!-- REPLACE THE SINGLE START GAME BUTTON WITH NEW OPTIONS -->
-			<div class="game-start-options">
-				<button id="newGameBtn" class="start-option-button">New Game</button>
-				<button
-					id="loadGameBtn"
-					class="start-option-button"
-					id="loadSaveStartBtn"
-				>
-					Load Game
-				</button>
-				<button id="onlineGameBtn" class="start-option-button">
-					Play Online
-				</button>
-			</div>
-
-			<!-- New Game Seed Popup -->
-			<div id="newGamePopup" class="popup">
-				<div class="popup-content seed-popup-content">
-					<span class="close-popup">&times;</span>
-					<h2>Start New Game</h2>
-					<div class="seed-input-container">
-						<label for="worldNameInput">World Name:</label>
-						<input
-							type="text"
-							id="worldNameInput"
-							placeholder="Enter world name"
-							required
-						/>
+					<div class="form-group">
+						<label for="worldSize">Размер мира:</label>
+						<select id="worldSize">
+							<option value="small">Маленький</option>
+							<option value="medium" selected>Средний</option>
+							<option value="large">Большой</option>
+						</select>
 					</div>
-					<div class="seed-input-container">
-						<label for="seedInput">Enter Seed (Optional):</label>
-						<input
-							type="text"
-							id="seedInput"
-							placeholder="Leave empty for random seed"
-						/>
-					</div>
-					<div class="popup-buttons">
-						<button id="startWithSeed" class="popup-button">Start Game</button>
-						<button class="popup-button cancel-seed">Cancel</button>
-					</div>
-				</div>
-			</div>
-
-			<!-- Replace the existing load game popup with a new world selection popup -->
-			<div class="world-selection-popup" id="worldSelectionPopup">
-				<div class="world-selection-content">
-					<span class="close-world-selection">&times;</span>
-					<h2>Select World</h2>
-					<div class="worlds-list" id="worldsList">
-						<!-- World entries will be added dynamically -->
-					</div>
-					<div class="no-worlds-message" id="noWorldsMessage">
-						No saved worlds found.
-					</div>
-				</div>
-			</div>
-
-			<!-- Existing load game confirmation popup can remain but is modified -->
-			<div class="save-popup" id="loadSaveStartPopup">
-				<div class="save-popup-content">
-					<h2>Load Selected World</h2>
-					<p>
-						Do you want to load <span id="selectedWorldName">this world</span>?
-					</p>
-					<div class="save-info" id="saveStartTimestamp"></div>
-					<div class="save-popup-buttons">
-						<button id="loadSaveStartConfirm" class="save-popup-button confirm">
-							Yes, Load Game
-						</button>
-						<button class="save-popup-button cancel">Cancel</button>
-					</div>
-				</div>
-			</div>
-
-			<!-- Online World Selection Popup -->
-			<div id="onlineWorldSelectionPopup" class="popup">
-				<div class="popup-content world-selection-content">
-					<span class="close-popup close-online-world-selection">&times;</span>
-					<h2>Select World for Online Play</h2>
-					<div class="worlds-list" id="onlineWorldsList">
-						<!-- World entries will be added dynamically -->
-					</div>
-					<div class="no-worlds-message" id="noOnlineWorldsMessage">
-						No worlds found. Create a new world first.
-					</div>
-				</div>
-			</div>
-
-			<!-- Friend Invitation Popup -->
-			<div id="inviteFriendsPopup" class="popup">
-				<div class="popup-content invite-popup-content">
-					<span class="close-popup close-invite">&times;</span>
-					<h2>Invite Friends to Play</h2>
-					<div class="friends-container">
-						<div class="no-friends-message" id="noInviteFriendsMessage">
-							Loading friends list...
-						</div>
-						<ul class="invite-friends-list"></ul>
-					</div>
-				</div>
-			</div>
-
-			<!-- Invitation Received Popup -->
-			<div id="invitationReceivedPopup" class="popup">
-				<div class="popup-content invitation-popup-content">
-					<span class="close-popup close-invitation">&times;</span>
-					<h2>Game Invitation</h2>
-					<p><span id="inviterName">Someone</span> has invited you to play!</p>
-					<!-- World name will be added here dynamically -->
-					<div class="invitation-buttons">
-						<button id="acceptInvitationBtn" class="invitation-button accept">
-							Accept
-						</button>
-						<button id="declineInvitationBtn" class="invitation-button decline">
-							Decline
+					<div class="form-buttons">
+						<button id="createWorldBtn" class="menu-button">Создать</button>
+						<button id="backFromNewBtn" class="menu-button secondary">
+							Назад
 						</button>
 					</div>
 				</div>
-			</div>
 
-			<!-- Authentication popup -->
-			<div id="authPopup" class="popup">
-				<div class="popup-content auth-popup-content">
-					<span class="close-popup close-auth">&times;</span>
-					<h2 id="authTitle">Login</h2>
+				<!-- Панель загрузки мира -->
+				<div id="loadWorldPanel" class="menu-panel">
+					<h2>Загрузить мир</h2>
+					<div id="worldsList" class="worlds-list">
+						<!-- Здесь будут отображаться сохраненные миры -->
+					</div>
+					<div class="form-buttons">
+						<button id="backFromLoadBtn" class="menu-button secondary">
+							Назад
+						</button>
+					</div>
+				</div>
 
-					<div class="auth-form">
+				<!-- Панель настроек -->
+				<div id="settingsPanel" class="menu-panel">
+					<h2>Настройки</h2>
+					<div class="form-group">
+						<label for="soundVolume">Громкость звука:</label>
+						<input type="range" id="soundVolume" min="0" max="100" value="50" />
+					</div>
+					<div class="form-group">
+						<label for="renderDistance">Дальность прорисовки:</label>
+						<select id="renderDistance">
+							<option value="10">Низкая</option>
+							<option value="20" selected>Средняя</option>
+							<option value="30">Высокая</option>
+						</select>
+					</div>
+					<div class="form-buttons">
+						<button id="saveSettingsBtn" class="menu-button">Сохранить</button>
+						<button id="backFromSettingsBtn" class="menu-button secondary">
+							Назад
+						</button>
+					</div>
+				</div>
+
+				<!-- Панель друзей -->
+				<div id="friendsPanel" class="menu-panel">
+					<h2>Друзья</h2>
+
+					<!-- Поиск друзей -->
+					<div class="friends-search">
+						<h3>Найти друзей</h3>
 						<div class="form-group">
-							<label for="emailInput">Email:</label>
-							<input
-								type="email"
-								id="emailInput"
-								placeholder="Enter your email"
-								required
-							/>
-						</div>
-						<div class="form-group">
-							<label for="passwordInput">Password:</label>
-							<input
-								type="password"
-								id="passwordInput"
-								placeholder="Enter your password"
-								required
-							/>
-						</div>
-						<div class="auth-error" id="authError"></div>
-						<div class="auth-buttons">
-							<button id="loginButton" class="auth-submit-button">Login</button>
-							<button
-								id="registerButton"
-								class="auth-submit-button"
-								style="display: none"
-							>
-								Register
-							</button>
-							<button id="googleAuthButton" class="google-auth-button">
-								<img
-									src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
-									alt="Google"
-								/>
-								Sign in with Google
-							</button>
-						</div>
-						<div class="auth-toggle">
-							<span id="toggleToRegister">Don't have an account? Register</span>
-							<span id="toggleToLogin" style="display: none"
-								>Already have an account? Login</span
-							>
-						</div>
-					</div>
-				</div>
-			</div>
-
-			<!-- Friends Popup -->
-			<div id="friendsPopup" class="popup">
-				<div class="popup-content friends-popup-content">
-					<span class="close-popup close-friends">&times;</span>
-					<h2>Friends</h2>
-
-					<div class="friends-tabs">
-						<button class="friends-tab-button active" data-tab="friends-list">
-							My Friends
-						</button>
-						<button class="friends-tab-button" data-tab="friend-requests">
-							Requests
-						</button>
-						<button class="friends-tab-button" data-tab="find-friends">
-							Find Users
-						</button>
-					</div>
-
-					<div class="friends-tab-content active" id="friends-list">
-						<div class="friends-container">
-							<div class="no-friends-message">
-								You don't have any friends yet.
-							</div>
-							<ul class="friends-list"></ul>
-						</div>
-					</div>
-
-					<div class="friends-tab-content" id="friend-requests">
-						<div class="requests-tabs">
-							<button
-								class="request-tab-button active"
-								data-tab="incoming-requests"
-							>
-								Incoming
-							</button>
-							<button class="request-tab-button" data-tab="outgoing-requests">
-								Sent
-							</button>
-						</div>
-
-						<div class="requests-tab-content active" id="incoming-requests">
-							<div class="no-requests-message">
-								No incoming friend requests.
-							</div>
-							<ul class="incoming-requests-list"></ul>
-						</div>
-
-						<div class="requests-tab-content" id="outgoing-requests">
-							<div class="no-requests-message">
-								No outgoing friend requests.
-							</div>
-							<ul class="outgoing-requests-list"></ul>
-						</div>
-					</div>
-
-					<div class="friends-tab-content" id="find-friends">
-						<div class="search-container">
 							<input
 								type="text"
-								id="friend-search"
-								placeholder="Search by email or username"
+								id="friendSearchInput"
+								placeholder="Email или имя пользователя"
 							/>
-							<button id="search-button">Search</button>
+							<button id="searchFriendBtn" class="menu-button small">
+								Поиск
+							</button>
 						</div>
+						<div id="searchResults" class="friends-section"></div>
+					</div>
 
-						<div class="search-results">
-							<div class="no-results-message">No users found.</div>
-							<ul class="search-results-list"></ul>
+					<!-- Запросы в друзья -->
+					<div class="friends-requests">
+						<h3>
+							Запросы в друзья <span id="requestsCount" class="badge">0</span>
+						</h3>
+						<div id="friendRequests" class="friends-section">
+							<p class="empty-list">У вас нет новых запросов в друзья</p>
 						</div>
+					</div>
+
+					<!-- Список друзей -->
+					<div class="friends-list-container">
+						<h3>Ваши друзья <span id="friendsCount" class="badge">0</span></h3>
+						<div id="friendsList" class="friends-section">
+							<p class="empty-list">У вас пока нет друзей</p>
+						</div>
+					</div>
+
+					<div class="form-buttons">
+						<button id="backFromFriendsBtn" class="menu-button secondary">
+							Назад
+						</button>
+					</div>
+				</div>
+
+				<!-- Панель мультиплеера -->
+				<div id="multiplayerPanel" class="menu-panel multiplayer-panel">
+					<h2>Мультиплеер</h2>
+
+					<!-- Создание игры -->
+					<div class="multiplayer-section create-game-section">
+						<h3>Создать новую игру</h3>
+						<div class="form-group">
+							<label for="useExistingWorldMP"
+								>Использовать существующий мир:</label
+							>
+							<select id="useExistingWorldMP">
+								<option value="new" selected>Создать новый мир</option>
+								<!-- Существующие миры будут загружены здесь -->
+							</select>
+						</div>
+						<div class="form-group" id="newWorldSettingsMP">
+							<label for="worldNameMP">Название мира:</label>
+							<input
+								type="text"
+								id="worldNameMP"
+								placeholder="Мультиплеер мир"
+							/>
+						</div>
+						<div class="form-group" id="worldSizeSettingMP">
+							<label for="worldSizeMP">Размер мира:</label>
+							<select id="worldSizeMP">
+								<option value="small">Маленький</option>
+								<option value="medium" selected>Средний</option>
+								<option value="large">Большой</option>
+							</select>
+						</div>
+						<div class="form-buttons">
+							<button id="createGameBtn" class="menu-button">
+								Создать игру
+							</button>
+						</div>
+					</div>
+
+					<!-- Присоединиться к игре -->
+					<div class="multiplayer-section join-game-section">
+						<h3>Активные игры</h3>
+						<div id="activeGamesContainer" class="active-games-container">
+							<!-- Здесь будут отображаться активные игры -->
+						</div>
+						<p
+							id="noGamesMessage"
+							class="no-games-message"
+							style="display: none"
+						>
+							Нет активных игр
+						</p>
+						<div class="form-buttons">
+							<button id="refreshGamesBtn" class="menu-button">
+								Обновить список
+							</button>
+						</div>
+					</div>
+
+					<div class="form-buttons">
+						<button id="backFromMultiplayerBtn" class="menu-button secondary">
+							Назад
+						</button>
 					</div>
 				</div>
 			</div>
 		</div>
-		<div id="game">
-			<div id="UI">
-				<div class="res">
-					<img
-						src="./src/assets/img/UI/Frame_res7.png"
-						class="frame moneyImg"
-						style="left: 10px"
-					/><span class="money Num" style="left: 10px">0</span>
-					<img
-						src="./src/assets/img/UI/Frame_res1.png"
-						class="frame res1Img"
-						style="left: 110px"
-					/><span class="res1 Num" style="left: 110px">0</span>
-					<img
-						src="./src/assets/img/UI/Frame_res2.png"
-						class="frame res2Img"
-						style="left: 210px"
-					/><span class="res2 Num" style="left: 210px">0</span>
-					<img
-						src="./src/assets/img/UI/Frame_res3.png"
-						class="frame res3Img"
-						style="left: 310px"
-					/><span class="res3 Num" style="left: 310px">0</span>
-					<img
-						src="./src/assets/img/UI/Frame_res4.png"
-						class="frame res4Img"
-						style="left: 410px"
-					/><span class="res4 Num" style="left: 410px">0</span>
-					<img
-						src="./src/assets/img/UI/Frame_res5.png"
-						class="frame res5Img"
-						style="left: 510px"
-					/><span class="res5 Num" style="left: 510px">0</span>
-					<img
-						src="./src/assets/img/UI/Frame_res6.png"
-						class="frame res6Img"
-						style="left: 610px"
-					/><span class="res6 Num" style="left: 610px">0</span>
-				</div>
-				<div class="notification">
-					<p></p>
-				</div>
 
-				<!-- Replace save controls with settings button -->
-				<div class="settings-button">Настройки</div>
-
-				<!-- Seed Display -->
-				<div class="seed-display">Seed: <span id="seed-value">N/A</span></div>
-			</div>
-
-			<!-- Settings Popup -->
-			<div class="settings-popup">
-				<div class="settings-popup-content">
-					<span class="close-settings">&times;</span>
-					<h2>Настройки</h2>
-					<div class="settings-options">
-						<div class="main-menu-button">В главное меню</div>
-						<div class="auto-save-toggle">Автосохранение: ВКЛ</div>
-						<div class="save-button">Сохранить</div>
+		<!-- Игровой контейнер (скрыт изначально) -->
+		<div id="gameContainer" class="game-container" style="display: none">
+			<canvas id="gameCanvas"></canvas>
+			<div class="ui-container">
+				<div class="inventory-bar" id="inventoryBar"></div>
+				<div class="player-stats">
+					<div class="health-bar">
+						<div class="health-fill" id="healthFill"></div>
 					</div>
 				</div>
 			</div>
+			<button id="returnToMenuBtn" class="menu-button return-button">
+				Меню
+			</button>
 
-			<!-- Keep the existing popups but hide load/delete buttons -->
-			<div class="save-popup" id="deleteSavePopup" style="display: none">
-				<!-- ...existing content... -->
-			</div>
-
-			<div class="save-popup" id="loadSavePopup" style="display: none">
-				<!-- ...existing content... -->
-			</div>
-
-			<div class="market">
-				<div class="selector">
-					<div class="sell">Sell</div>
-					<div class="buy">Buy</div>
-				</div>
-				<div class="sellBlock" style="display: none">
-					<div class="cost">
-						<img src="./src/assets/img/UI/Frame_res1.png" class="frameMarket" />
-						<div class="Settings">
-							<p class="piece">= 10 coins for 1 piece</p>
-							<p class="sellRes1 sellBtn">SELL</p>
-						</div>
-					</div>
-					<div class="cost">
-						<img src="./src/assets/img/UI/Frame_res2.png" class="frameMarket" />
-						<div class="Settings">
-							<p class="piece">= 20 coins for 1 piece</p>
-							<p class="sellRes2 sellBtn">SELL</p>
-						</div>
-					</div>
-					<div class="cost">
-						<img src="./src/assets/img/UI/Frame_res3.png" class="frameMarket" />
-						<div class="Settings">
-							<p class="piece">= 30 coins for 1 piece</p>
-							<p class="sellRes3 sellBtn">SELL</p>
-						</div>
-					</div>
-					<div class="cost">
-						<img src="./src/assets/img/UI/Frame_res4.png" class="frameMarket" />
-						<div class="Settings">
-							<p class="piece">= 40 coins for 1 piece</p>
-							<p class="sellRes4 sellBtn">SELL</p>
-						</div>
-					</div>
-					<div class="cost">
-						<img src="./src/assets/img/UI/Frame_res5.png" class="frameMarket" />
-						<div class="Settings">
-							<p class="piece">= 50 coins for 1 piece</p>
-							<p class="sellRes5 sellBtn">SELL</p>
-						</div>
-					</div>
-					<div class="cost">
-						<img src="./src/assets/img/UI/Frame_res6.png" class="frameMarket" />
-						<div class="Settings">
-							<p class="piece">= 60 coins for 1 piece</p>
-							<p class="sellRes6 sellBtn">SELL</p>
-						</div>
-					</div>
-				</div>
-				<div class="buyBlock" style="display: none">
-					<div class="cost">
-						<img src="./src/assets/img/UI/Frame_res1.png" class="frameMarket" />
-						<div class="Settings">
-							<p class="piece">= 20 coins for 1 piece</p>
-							<p class="buyRes1 buyBtn">BUY</p>
-						</div>
-					</div>
-					<div class="cost">
-						<img src="./src/assets/img/UI/Frame_res2.png" class="frameMarket" />
-						<div class="Settings">
-							<p class="piece">= 40 coins for 1 piece</p>
-							<p class="buyRes2 buyBtn">BUY</p>
-						</div>
-					</div>
-					<div class="cost">
-						<img src="./src/assets/img/UI/Frame_res3.png" class="frameMarket" />
-						<div class="Settings">
-							<p class="piece">= 60 coins for 1 piece</p>
-							<p class="buyRes3 buyBtn">BUY</p>
-						</div>
-					</div>
-					<div class="cost">
-						<img src="./src/assets/img/UI/Frame_res4.png" class="frameMarket" />
-						<div class="Settings">
-							<p class="piece">= 80 coins for 1 piece</p>
-							<p class="buyRes4 buyBtn">BUY</p>
-						</div>
-					</div>
-					<div class="cost">
-						<img src="./src/assets/img/UI/Frame_res5.png" class="frameMarket" />
-						<div class="Settings">
-							<p class="piece">= 100 coins for 1 piece</p>
-							<p class="buyRes5 buyBtn">BUY</p>
-						</div>
-					</div>
-					<div class="cost">
-						<img src="./src/assets/img/UI/Frame_res6.png" class="frameMarket" />
-						<div class="Settings">
-							<p class="piece">= 120 coins for 1 piece</p>
-							<p class="buyRes6 buyBtn">BUY</p>
-						</div>
-					</div>
-				</div>
-			</div>
-			<div class="forge">
-				<h2>You need</h2>
-				<div class="resurse">
-					<div class="resurse1"></div>
-					<div class="resurse2"></div>
-					<div class="resurse3"></div>
-				</div>
-				<div class="createPick">Create Pick</div>
+			<!-- Статус мультиплеера -->
+			<div
+				id="multiplayerStatusBar"
+				class="multiplayer-status-bar"
+				style="display: none"
+			>
+				<h4>Игроки онлайн</h4>
+				<ul id="playersList" class="players-list">
+					<!-- Здесь будут отображаться игроки -->
+				</ul>
 			</div>
 		</div>
 
-		<script type="module" src="/src/main.js"></script>
+		<div
+			id="profilePanel"
+			class="auth-container profile-panel"
+			style="display: none"
+		>
+			<h2>Профиль пользователя</h2>
+			<div class="form-group">
+				<label for="profileDisplayName">Имя:</label>
+				<input
+					type="text"
+					id="profileDisplayName"
+					placeholder="Имя пользователя"
+				/>
+			</div>
+			<div class="form-group">
+				<label for="profileEmail">Email:</label>
+				<input type="email" id="profileEmail" placeholder="Email" readonly />
+			</div>
+			<div class="form-group">
+				<label for="profileNewPassword">Новый пароль:</label>
+				<input
+					type="password"
+					id="profileNewPassword"
+					placeholder="Оставьте пустым, чтобы не менять"
+				/>
+			</div>
+			<div class="form-group">
+				<label for="profileConfirmPassword">Подтвердите пароль:</label>
+				<input
+					type="password"
+					id="profileConfirmPassword"
+					placeholder="Подтвердите новый пароль"
+				/>
+			</div>
+			<button id="saveProfileButton" class="menu-button">
+				Сохранить изменения
+			</button>
+			<button id="closeProfileButton" class="menu-button secondary">
+				Закрыть
+			</button>
+			<p id="profileMessage" class="message"></p>
+		</div>
+
+		<script src="js/utils.js"></script>
+		<script src="js/crafting.js"></script>
+		<script src="js/crafting-system-fix.js"></script>
+		<script src="js/blocks.js"></script>
+		<script src="js/renderer.js"></script>
+		<script src="js/inventory-css.js"></script>
+		<script src="js/inventory.js"></script>
+		<script src="js/inventory-sync.js"></script>
+		<script src="js/crafting-css.js"></script>
+		<script src="js/crafting-ui.js"></script>
+		<script src="js/crafting-ui-fixed.js"></script>
+		<script src="js/crafting-ui-rewrite.js"></script>
+		<script src="js/crafting-fix.js"></script>
+		<script src="js/crafting-connector.js"></script>
+		<script src="js/crafting-button-fix.js"></script>
+		<script src="js/emergency-crafting-fix.js"></script>
+		<script src="js/ultimate-crafting-fix.js"></script>
+		<script src="js/offline-crafting-fix.js"></script>
+		<script src="js/comprehensive-offline-crafting-fix.js"></script>
+		<script src="js/critical-offline-crafting-fix.js"></script>
+		<script src="js/auto-crafting-init.js"></script>
+		<script src="js/player.js"></script>
+		<script src="js/mining-system-fix.js"></script>
+		<script src="js/tool-progression-fix.js"></script>
+		<script src="js/worldManager.js"></script>
+		<script src="js/world.js"></script>
+		<script src="js/menu.js"></script>
+		<script src="js/game.js"></script>
+		<script src="js/game-crafting-init-fix.js"></script>
+		<script src="js/firebase-auth.js"></script>
+		<script src="js/friends.js"></script>
+		<script src="js/multiplayer.js"></script>
+		<script src="js/multiplayer-ui.js"></script>
+		<script src="js/game-monitor.js"></script>
+		<script src="js/tool-spawner.js"></script>
+		<script src="js/game-enhancements.js"></script>
+		<script src="js/ultimate-crafting-fix.js"></script>
+		<script src="js/complete-crafting-fix.js"></script>
+		<script src="js/torch-recipe-consumption-fix.js"></script>
+		<script src="js/inventory-reset-fix.js"></script>
+		<script src="js/inventory-persistence-fix.js"></script>
+		<script src="js/inventory-visibility-fix.js"></script>
+		<script src="js/inventory-tooltips.js"></script>
+		<script src="js/crafting-result-tooltips.js"></script>
+		<script src="js/crafting-click-fix.js"></script>
+		<script src="js/ui-keyboard-control.js"></script>
+		<script src="js/ui-zindex-fix.js"></script>
+		<script src="js/inventory-tooltips.js"></script>
+		<script src="js/fullscreen-manager.js"></script>
+		<script src="js/settings-menu.js"></script>
+		<script src="js/texture-loader.js"></script>
+		<script src="js/texture-renderer.js"></script>
+		<script src="js/inventory-texture-support.js"></script>
 	</body>
 </html>

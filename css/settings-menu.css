@@ -1,0 +1,180 @@
+/**
+ * Settings Menu CSS
+ * Styles for the in-game settings menu and button
+ */
+
+/* Settings Button */
+.game-settings-button {
+	position: absolute;
+	top: 20px;
+	left: 20px;
+	width: 40px;
+	height: 40px;
+	background-color: rgba(0, 0, 0, 0.6);
+	border: 2px solid #aaa;
+	border-radius: 5px;
+	color: white;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	cursor: pointer;
+	z-index: 100;
+	transition: background-color 0.2s, border-color 0.2s;
+}
+
+.game-settings-button:hover {
+	background-color: rgba(0, 0, 0, 0.8);
+	border-color: #fff;
+}
+
+.game-settings-button svg {
+	width: 20px;
+	height: 20px;
+}
+
+/* Settings Menu */
+.game-settings-menu {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	width: 400px;
+	max-width: 90%;
+	max-height: 90vh;
+	background-color: rgba(0, 0, 0, 0.85);
+	border: 2px solid #555;
+	border-radius: 8px;
+	padding: 0;
+	z-index: 1000;
+	overflow: hidden;
+	box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+	color: white;
+}
+
+/* Settings Header */
+.settings-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 10px 15px;
+	background-color: rgba(0, 0, 0, 0.5);
+	border-bottom: 1px solid #555;
+}
+
+.settings-header h2 {
+	margin: 0;
+	color: #4caf50;
+	font-size: 1.4em;
+}
+
+.key-hint {
+	color: #aaa;
+	font-size: 0.8em;
+	background-color: rgba(255, 255, 255, 0.1);
+	border: 1px solid rgba(255, 255, 255, 0.2);
+	padding: 2px 6px;
+	border-radius: 4px;
+}
+
+.close-settings-btn {
+	background: none;
+	border: none;
+	color: #aaa;
+	font-size: 24px;
+	cursor: pointer;
+	padding: 0 5px;
+	line-height: 1;
+}
+
+.close-settings-btn:hover {
+	color: white;
+}
+
+/* Settings Content */
+.settings-content {
+	padding: 15px;
+	max-height: calc(90vh - 50px);
+	overflow-y: auto;
+}
+
+/* Settings Sections */
+.settings-section {
+	margin-bottom: 20px;
+	padding-bottom: 15px;
+	border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.settings-section:last-child {
+	border-bottom: none;
+	margin-bottom: 0;
+	padding-bottom: 0;
+}
+
+.settings-section h3 {
+	margin: 0 0 15px 0;
+	color: #e9e9e9;
+	font-size: 1.2em;
+}
+
+/* Controls List */
+.controls-list {
+	display: grid;
+	grid-template-columns: 1fr;
+	gap: 8px;
+}
+
+.control-item {
+	display: flex;
+	align-items: center;
+	font-size: 0.95em;
+}
+
+.key {
+	display: inline-block;
+	background-color: rgba(255, 255, 255, 0.1);
+	border: 1px solid rgba(255, 255, 255, 0.3);
+	border-radius: 4px;
+	padding: 3px 6px;
+	margin-right: 10px;
+	font-family: monospace;
+	min-width: 30px;
+	text-align: center;
+}
+
+/* Setting Options */
+.setting-option {
+	margin: 10px 0;
+}
+
+.setting-button {
+	background-color: #2a2a2a;
+	color: white;
+	border: 1px solid #555;
+	border-radius: 4px;
+	padding: 8px 15px;
+	cursor: pointer;
+	transition: background-color 0.2s;
+	width: 100%;
+	text-align: left;
+}
+
+.setting-button:hover {
+	background-color: #3a3a3a;
+}
+
+/* Exit Button */
+.exit-button {
+	width: 100%;
+	padding: 10px;
+	background-color: #d32f2f;
+	color: white;
+	border: none;
+	border-radius: 4px;
+	cursor: pointer;
+	font-size: 1em;
+	transition: background-color 0.2s;
+}
+
+.exit-button:hover {
+	background-color: #f44336;
+}

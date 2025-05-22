@@ -1,0 +1,60 @@
+/**
+ * Inventory Tooltip CSS
+ *
+ * This file provides CSS styles for inventory item tooltips.
+ * Included directly in the inventory-tooltips.js for convenience.
+ */
+
+.item-tooltip {
+	position: absolute;
+	background-color: rgba(20, 20, 20, 0.95);
+	color: white;
+	padding: 8px 12px;
+	border-radius: 5px;
+	font-size: 14px;
+	pointer-events: none;
+	z-index: 2000;
+	display: none;
+	box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+	border: 1px solid #666;
+	max-width: 220px;
+	transition: opacity 0.15s ease-in-out;
+	opacity: 0;
+}
+
+.item-tooltip strong {
+	color: #ffffff;
+	font-size: 15px;
+	display: block;
+	margin-bottom: 3px;
+}
+
+.item-tooltip .item-count {
+	color: #aaa;
+}
+
+.item-tooltip .item-info {
+	font-size: 12px;
+	color: #bbb;
+	margin-top: 3px;
+	line-height: 1.4;
+}
+
+/* Tooltip arrow */
+.item-tooltip::after {
+	content: '';
+	position: absolute;
+	top: 50%;
+	right: 100%;
+	margin-top: -5px;
+	border-width: 5px;
+	border-style: solid;
+	border-color: transparent rgba(20, 20, 20, 0.95) transparent transparent;
+}
+
+/* Tooltip highlighting effects */
+.inventory-slot:hover .item-display,
+.recipe-item:hover .item-display {
+	box-shadow: 0 0 0 1px #aaa;
+	transition: box-shadow 0.1s ease-in-out;
+}
