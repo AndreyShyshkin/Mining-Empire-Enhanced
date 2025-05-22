@@ -79,178 +79,212 @@ console.log('Loading mining-system-fix.js')
 
 // Override player mining methods to support mining power requirements
 ;(function () {
-	// Save original methods
-	const originalStartMining = window.Player.prototype.startMining
-	const originalUpdateMining = window.Player.prototype.updateMining
+	// Check if Player is defined before attempting to override methods
+	if (!window.Player) {
+		console.log(
+			'Player class not available yet, mining system fix will apply later'
+		)
 
-	// Override startMining method
-	window.Player.prototype.startMining = function (tileX, tileY) {
-		// Call original method to get basic checks
-		const canStartMining = originalStartMining.call(this, tileX, tileY)
-
-		if (canStartMining) {
-			const blockType = this.world.getTile(tileX, tileY)
-			const block = window.BLOCKS[blockType]
-
-			// Check if block requires a specific mining power
-			if (block.requiredMiningPower !== undefined) {
-				// Get the currently equipped pickaxe/axe power
-				const equippedTool = this.inventory.hotbar[this.inventory.selectedSlot]
-
-				if (!equippedTool) {
-					console.log('No tool equipped!')
-					// Add a visual warning near the player
-					this.showToolWarning('Need a tool!')
-					return false
-				}
-
-				const toolBlock = window.BLOCKS[equippedTool.itemType]
-
-				if (!toolBlock || !toolBlock.toolType || !toolBlock.miningPower) {
-					console.log('Not a mining tool!')
-					// If it's wood or other resource, assume axe/pickaxe needed
-					if (block.name.includes('Wood') || block.name.includes('Tree')) {
-						this.showToolWarning('Need an axe!')
-					} else {
-						this.showToolWarning('Need a pickaxe!')
-					}
-					return false
-				}
-
-				// Check if tool type matches (pickaxe for ores, axe for wood)
-				if (
-					(block.name.includes('Wood') || block.name.includes('Tree')) &&
-					toolBlock.toolType !== 'axe'
-				) {
-					console.log('Need an axe for wood!')
-					this.showToolWarning('Need an axe!')
-					return false
-				}
-
-				if (
-					(block.name.includes('Ore') || block.name.includes('Stone')) &&
-					toolBlock.toolType !== 'pickaxe'
-				) {
-					console.log('Need a pickaxe for ore/stone!')
-					this.showToolWarning('Need a pickaxe!')
-					return false
-				}
-
-				// Check mining power
-				if (toolBlock.miningPower < block.requiredMiningPower) {
-					console.log(
-						`Tool power (${toolBlock.miningPower}) too weak for block (${block.requiredMiningPower})!`
-					)
-					this.showToolWarning(`Need stronger ${toolBlock.toolType}!`)
-					return false
-				}
-
-				// Calculate mining speed multiplier based on tool power vs block requirement
-				const powerDifference =
-					toolBlock.miningPower - block.requiredMiningPower
-				if (powerDifference >= 0) {
-					// Tool is strong enough - add speed bonus based on how much stronger it is
-					this.miningSpeedMultiplier = 1 + powerDifference * 0.2 // 20% faster per power level above requirement
-					console.log(`Mining speed multiplier: ${this.miningSpeedMultiplier}`)
-				} else {
-					// This case should not happen due to previous check, but just to be safe
-					this.miningSpeedMultiplier = 0.5 // 50% slower if tool is too weak
-				}
+		// Set up a delayed initialization to try again after all scripts are loaded
+		window.addEventListener('load', function () {
+			if (window.Player) {
+				console.log('Applying mining system fix after window load')
+				applyMiningSystemFix()
 			} else {
-				this.miningSpeedMultiplier = 1 // Default speed
+				console.warn('Player class still not available after window load')
 			}
-
-			return true
-		}
-
-		return false
+		})
+		return
 	}
 
-	// Override updateMining method to use miningSpeedMultiplier
-	window.Player.prototype.updateMining = function (deltaTime) {
-		if (this.isMining && this.miningTarget) {
-			const blockType = this.world.getTile(
-				this.miningTarget.x,
-				this.miningTarget.y
+	// Apply overrides immediately if Player is available
+	applyMiningSystemFix()
+
+	function applyMiningSystemFix() {
+		// Check if window.Player and its prototype exist before attempting to override
+		if (!window.Player || !window.Player.prototype) {
+			console.warn(
+				'Player prototype not available, mining system fix not applied'
 			)
+			return
+		}
 
-			if (blockType !== window.BLOCK_TYPES.AIR) {
+		// Save original methods
+		const originalStartMining = window.Player.prototype.startMining
+		const originalUpdateMining = window.Player.prototype.updateMining
+
+		// Override startMining method
+		window.Player.prototype.startMining = function (tileX, tileY) {
+			// Call original method to get basic checks
+			const canStartMining = originalStartMining.call(this, tileX, tileY)
+
+			if (canStartMining) {
+				const blockType = this.world.getTile(tileX, tileY)
 				const block = window.BLOCKS[blockType]
-				// Apply mining speed multiplier to progress
-				this.miningProgress +=
-					(deltaTime / (block.hardness * 1000)) *
-					(this.miningSpeedMultiplier || 1)
 
-				if (this.miningProgress >= 1) {
-					// Block is mined!
-					this.inventory.addItem(blockType, 1)
-					this.world.setTile(
-						this.miningTarget.x,
-						this.miningTarget.y,
-						window.BLOCK_TYPES.AIR
-					)
+				// Check if block requires a specific mining power
+				if (block.requiredMiningPower !== undefined) {
+					// Get the currently equipped pickaxe/axe power
+					const equippedTool =
+						this.inventory.hotbar[this.inventory.selectedSlot]
+
+					if (!equippedTool) {
+						console.log('No tool equipped!')
+						// Add a visual warning near the player
+						this.showToolWarning('Need a tool!')
+						return false
+					}
+
+					const toolBlock = window.BLOCKS[equippedTool.itemType]
+
+					if (!toolBlock || !toolBlock.toolType || !toolBlock.miningPower) {
+						console.log('Not a mining tool!')
+						// If it's wood or other resource, assume axe/pickaxe needed
+						if (block.name.includes('Wood') || block.name.includes('Tree')) {
+							this.showToolWarning('Need an axe!')
+						} else {
+							this.showToolWarning('Need a pickaxe!')
+						}
+						return false
+					}
+
+					// Check if tool type matches (pickaxe for ores, axe for wood)
+					if (
+						(block.name.includes('Wood') || block.name.includes('Tree')) &&
+						toolBlock.toolType !== 'axe'
+					) {
+						console.log('Need an axe for wood!')
+						this.showToolWarning('Need an axe!')
+						return false
+					}
+
+					if (
+						(block.name.includes('Ore') || block.name.includes('Stone')) &&
+						toolBlock.toolType !== 'pickaxe'
+					) {
+						console.log('Need a pickaxe for ore/stone!')
+						this.showToolWarning('Need a pickaxe!')
+						return false
+					}
+
+					// Check mining power
+					if (toolBlock.miningPower < block.requiredMiningPower) {
+						console.log(
+							`Tool power (${toolBlock.miningPower}) too weak for block (${block.requiredMiningPower})!`
+						)
+						this.showToolWarning(`Need stronger ${toolBlock.toolType}!`)
+						return false
+					}
+
+					// Calculate mining speed multiplier based on tool power vs block requirement
+					const powerDifference =
+						toolBlock.miningPower - block.requiredMiningPower
+					if (powerDifference >= 0) {
+						// Tool is strong enough - add speed bonus based on how much stronger it is
+						this.miningSpeedMultiplier = 1 + powerDifference * 0.2 // 20% faster per power level above requirement
+						console.log(
+							`Mining speed multiplier: ${this.miningSpeedMultiplier}`
+						)
+					} else {
+						// This case should not happen due to previous check, but just to be safe
+						this.miningSpeedMultiplier = 0.5 // 50% slower if tool is too weak
+					}
+				} else {
+					this.miningSpeedMultiplier = 1 // Default speed
+				}
+
+				return true
+			}
+
+			return false
+		}
+
+		// Override updateMining method to use miningSpeedMultiplier
+		window.Player.prototype.updateMining = function (deltaTime) {
+			if (this.isMining && this.miningTarget) {
+				const blockType = this.world.getTile(
+					this.miningTarget.x,
+					this.miningTarget.y
+				)
+
+				if (blockType !== window.BLOCK_TYPES.AIR) {
+					const block = window.BLOCKS[blockType]
+					// Apply mining speed multiplier to progress
+					this.miningProgress +=
+						(deltaTime / (block.hardness * 1000)) *
+						(this.miningSpeedMultiplier || 1)
+
+					if (this.miningProgress >= 1) {
+						// Block is mined!
+						this.inventory.addItem(blockType, 1)
+						this.world.setTile(
+							this.miningTarget.x,
+							this.miningTarget.y,
+							window.BLOCK_TYPES.AIR
+						)
+						this.isMining = false
+						this.miningTarget = null
+						this.miningProgress = 0
+
+						// In multiplayer, notify other players via socket
+						if (window.socket) {
+							window.socket.emit('break-block', {
+								x: this.miningTarget.x,
+								y: this.miningTarget.y,
+							})
+						}
+					}
+				} else {
+					// If block is already air (mined by someone else in multiplayer)
 					this.isMining = false
 					this.miningTarget = null
 					this.miningProgress = 0
-
-					// In multiplayer, notify other players via socket
-					if (window.socket) {
-						window.socket.emit('break-block', {
-							x: this.miningTarget.x,
-							y: this.miningTarget.y,
-						})
-					}
 				}
-			} else {
-				// If block is already air (mined by someone else in multiplayer)
-				this.isMining = false
-				this.miningTarget = null
-				this.miningProgress = 0
 			}
 		}
-	}
 
-	// Add method to display tool warning messages
-	window.Player.prototype.showToolWarning = function (message) {
-		console.log('Tool warning:', message)
+		// Add method to display tool warning messages
+		window.Player.prototype.showToolWarning = function (message) {
+			console.log('Tool warning:', message)
 
-		// Create warning element if doesn't exist
-		if (!this.warningElement) {
-			this.warningElement = document.createElement('div')
-			this.warningElement.className = 'tool-warning'
-			this.warningElement.style.position = 'absolute'
-			this.warningElement.style.padding = '5px 10px'
-			this.warningElement.style.background = 'rgba(255, 0, 0, 0.7)'
-			this.warningElement.style.color = 'white'
-			this.warningElement.style.borderRadius = '5px'
-			this.warningElement.style.fontFamily = 'Arial, sans-serif'
-			this.warningElement.style.fontSize = '14px'
-			this.warningElement.style.fontWeight = 'bold'
-			this.warningElement.style.pointerEvents = 'none'
-			this.warningElement.style.zIndex = '1000'
-			this.warningElement.style.display = 'none'
-			document.body.appendChild(this.warningElement)
-		}
-
-		// Position above player's head
-		const screenX = this.x - window.viewportOffsetX
-		const screenY = this.y - window.viewportOffsetY - 50 // 50px above player
-
-		this.warningElement.style.left = `${screenX}px`
-		this.warningElement.style.top = `${screenY}px`
-		this.warningElement.textContent = message
-		this.warningElement.style.display = 'block'
-
-		// Hide after 2 seconds
-		if (this.warningTimeout) {
-			clearTimeout(this.warningTimeout)
-		}
-
-		this.warningTimeout = setTimeout(() => {
-			if (this.warningElement) {
+			// Create warning element if doesn't exist
+			if (!this.warningElement) {
+				this.warningElement = document.createElement('div')
+				this.warningElement.className = 'tool-warning'
+				this.warningElement.style.position = 'absolute'
+				this.warningElement.style.padding = '5px 10px'
+				this.warningElement.style.background = 'rgba(255, 0, 0, 0.7)'
+				this.warningElement.style.color = 'white'
+				this.warningElement.style.borderRadius = '5px'
+				this.warningElement.style.fontFamily = 'Arial, sans-serif'
+				this.warningElement.style.fontSize = '14px'
+				this.warningElement.style.fontWeight = 'bold'
+				this.warningElement.style.pointerEvents = 'none'
+				this.warningElement.style.zIndex = '1000'
 				this.warningElement.style.display = 'none'
+				document.body.appendChild(this.warningElement)
 			}
-		}, 2000)
+
+			// Position above player's head
+			const screenX = this.x - window.viewportOffsetX
+			const screenY = this.y - window.viewportOffsetY - 50 // 50px above player
+
+			this.warningElement.style.left = `${screenX}px`
+			this.warningElement.style.top = `${screenY}px`
+			this.warningElement.textContent = message
+			this.warningElement.style.display = 'block'
+
+			// Hide after 2 seconds
+			if (this.warningTimeout) {
+				clearTimeout(this.warningTimeout)
+			}
+
+			this.warningTimeout = setTimeout(() => {
+				if (this.warningElement) {
+					this.warningElement.style.display = 'none'
+				}
+			}, 2000)
+		}
 	}
 })()
 

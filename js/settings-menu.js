@@ -286,4 +286,5 @@ console.log('Loading settings-menu.js')
 	window.toggleSettingsMenu = toggleSettingsMenu
 	window.closeSettingsMenu = closeSettingsMenu
 	window.initSettingsMenu = initSettingsMenu
+	window.createSettingsButton = createSettingsButton
 })()

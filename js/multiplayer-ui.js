@@ -177,8 +177,118 @@ document.addEventListener('DOMContentLoaded', function () {
 		if (window.gameMenu) {
 			window.gameMenu.mainMenu.style.display = 'none'
 			window.gameMenu.gameContainer.style.display = 'block'
-			window.gameMenu.controlsInfo.style.display = 'block'
+
+			// Handle the case where controlsInfo was removed in settings-menu.js
+			if (window.gameMenu.controlsInfo) {
+				window.gameMenu.controlsInfo.style.display = 'block'
+			}
 		}
+
+		// Trigger canvas resize to ensure correct display
+		if (typeof window.resizeGameCanvas === 'function') {
+			window.resizeGameCanvas()
+		} else if (typeof window.resizeCanvas === 'function') {
+			window.resizeCanvas()
+		}
+
+		// Create fullscreen and settings buttons with retry logic
+		let attempts = 0
+		const maxAttempts = 5
+		const createUIButtons = () => {
+			console.log(
+				'Attempting to create UI buttons for multiplayer mode, attempt:',
+				attempts + 1
+			)
+			attempts++
+
+			// Try to create fullscreen button directly
+			if (typeof window.createFullscreenButton === 'function') {
+				window.createFullscreenButton()
+				console.log('Called createFullscreenButton function')
+			} else {
+				console.warn('createFullscreenButton function not available')
+			}
+
+			// Try to initialize settings menu
+			if (typeof window.initSettingsMenu === 'function') {
+				window.initSettingsMenu()
+				console.log('Called initSettingsMenu function')
+			} else if (typeof window.createSettingsButton === 'function') {
+				// Try direct button creation if initSettingsMenu is not available
+				window.createSettingsButton()
+				console.log('Called createSettingsButton function directly')
+			} else {
+				console.warn(
+					'Neither initSettingsMenu nor createSettingsButton function is available'
+				)
+			}
+
+			// Check if buttons are present
+			const fullscreenBtn = document.getElementById('fullscreenBtn')
+			const settingsBtn = document.getElementById('gameSettingsBtn')
+
+			// If buttons are not created yet and we haven't exceeded max attempts, try again
+			if ((!fullscreenBtn || !settingsBtn) && attempts < maxAttempts) {
+				console.log('UI buttons not found, retrying in 500ms...')
+				setTimeout(createUIButtons, 500)
+			} else {
+				// Ensure buttons are visible if they exist
+				if (fullscreenBtn) {
+					fullscreenBtn.style.display = 'flex'
+					console.log('Fullscreen button found and made visible')
+				} else {
+					console.error(
+						'Fullscreen button not found after',
+						attempts,
+						'attempts'
+					)
+				}
+
+				if (settingsBtn) {
+					settingsBtn.style.display = 'flex'
+					console.log('Settings button found and made visible')
+				} else {
+					console.error('Settings button not found after', attempts, 'attempts')
+				}
+			}
+		}
+
+		// Start the button creation process
+		createUIButtons()
+
+		// Force another resize after a short delay to ensure the browser has updated dimensions
+		setTimeout(() => {
+			if (typeof window.resizeGameCanvas === 'function') {
+				window.resizeGameCanvas()
+			} else if (typeof window.resizeCanvas === 'function') {
+				window.resizeCanvas()
+			}
+
+			// Double-check that buttons are visible
+			const fullscreenBtn = document.getElementById('fullscreenBtn')
+			const settingsBtn = document.getElementById('gameSettingsBtn')
+
+			// Ensure buttons are visible and properly styled
+			if (fullscreenBtn) {
+				fullscreenBtn.style.display = 'flex'
+				fullscreenBtn.style.zIndex = '1000' // Make sure it's above other elements
+				console.log('Ensuring fullscreen button visibility')
+			} else if (typeof window.createFullscreenButton === 'function') {
+				// Try to create it again if it doesn't exist
+				window.createFullscreenButton()
+				console.log('Attempting to recreate fullscreen button')
+			}
+
+			if (settingsBtn) {
+				settingsBtn.style.display = 'flex'
+				settingsBtn.style.zIndex = '1000' // Make sure it's above other elements
+				console.log('Ensuring settings button visibility')
+			} else if (typeof window.initSettingsMenu === 'function') {
+				// Try to create it again if it doesn't exist
+				window.initSettingsMenu()
+				console.log('Attempting to recreate settings button')
+			}
+		}, 500) // Increased delay to give more time for other scripts to initialize
 
 		// Show multiplayer status bar
 		if (multiplayerStatusBar) {
@@ -200,8 +310,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
 		// Set up game with this world
 		const canvas = document.getElementById('gameCanvas')
-		canvas.width = 800
-		canvas.height = 600
+		const gameContainer = document.getElementById('gameContainer')
+
+		// Use container dimensions instead of hardcoded values
+		canvas.width = gameContainer.clientWidth
+		canvas.height = gameContainer.clientHeight
 		const ctx = canvas.getContext('2d')
 
 		// Create player
@@ -243,6 +356,14 @@ document.addEventListener('DOMContentLoaded', function () {
 			window.multiplayerSystem.startPeriodicSaving(120000)
 		}
 
+		// Force canvas resize after a slight delay to ensure proper rendering
+		setTimeout(() => {
+			if (typeof window.resizeGameCanvas === 'function') {
+				window.resizeGameCanvas()
+				console.log('Forced canvas resize for multiplayer game')
+			}
+		}, 100)
+
 		// Hide loading indicator
 		hideLoading()
 	}
@@ -253,6 +374,13 @@ document.addEventListener('DOMContentLoaded', function () {
 		window.world = world
 		window.player = player
 		window.renderer = renderer
+
+		// Make sure we have a window resize handler for multiplayer
+		window.addEventListener('resize', () => {
+			if (typeof window.resizeGameCanvas === 'function') {
+				window.resizeGameCanvas()
+			}
+		})
 
 		// Set up multiplayer update interval
 		const multiplayerUpdateInterval = setInterval(() => {
@@ -274,6 +402,23 @@ document.addEventListener('DOMContentLoaded', function () {
 
 				// Update UI with connected players
 				updateMultiplayerUI()
+
+				// Periodically check if UI buttons are visible
+				if (gameTime % 300 === 0) {
+					// Check every 5 seconds (assuming 60fps)
+					const fullscreenBtn = document.getElementById('fullscreenBtn')
+					const settingsBtn = document.getElementById('gameSettingsBtn')
+
+					if (fullscreenBtn && fullscreenBtn.style.display !== 'flex') {
+						fullscreenBtn.style.display = 'flex'
+						console.log('Restored fullscreen button visibility')
+					}
+
+					if (settingsBtn && settingsBtn.style.display !== 'flex') {
+						settingsBtn.style.display = 'flex'
+						console.log('Restored settings button visibility')
+					}
+				}
 			}
 		}, 1000)
 

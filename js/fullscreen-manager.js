@@ -6,7 +6,6 @@
  */
 
 console.log('Loading fullscreen-manager.js')
-
 ;(function () {
 	// Create fullscreen button
 	function createFullscreenButton() {
@@ -235,4 +234,5 @@ console.log('Loading fullscreen-manager.js')
 	// Expose functions globally
 	window.toggleFullscreen = toggleFullscreen
 	window.resizeGameCanvas = resizeGameCanvas
+	window.createFullscreenButton = createFullscreenButton
 })()

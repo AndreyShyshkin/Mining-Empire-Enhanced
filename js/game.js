@@ -39,6 +39,9 @@ function startGame(worldMeta, currentWorldId, worldManagerInstance) {
 	resizeCanvas()
 	window.addEventListener('resize', resizeCanvas)
 
+	// Make resizeCanvas globally available for other modules
+	window.resizeCanvas = resizeCanvas
+
 	ctx = canvas.getContext('2d')
 
 	// Показываем сообщение о загрузке
