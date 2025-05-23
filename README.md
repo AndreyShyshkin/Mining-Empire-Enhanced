@@ -20,11 +20,6 @@
 
 > 📸 **Add feature showcase here**: `screenshots/features-grid.png` - 2x2 grid showing mining, crafting, building, and exploration
 
-### ⚔️ Combat & Survival
-- **Enemy Encounters** - Face off against underground creatures and bosses
-- **Weapon Crafting** - Forge powerful tools and weapons for survival
-- **Resource Management** - Balance health, hunger, and equipment durability
-
 ### 🎨 Visual Experience
 - **Pixel Art Graphics** - Beautiful hand-crafted 2D sprites and animations
 - **Dynamic Lighting** - Atmospheric lighting effects in caves and buildings
@@ -46,12 +41,10 @@
 > - `first-base.png` - Example of a starter base
 
 ### Controls
-- **WASD** / **Arrow Keys** - Move character
+- **WASD** - Move character
 - **Mouse** - Interact with blocks and items
 - **E** - Open inventory
 - **C** - Open crafting menu
-- **Space** - Jump
-- **Shift** - Run
 
 ---
 
@@ -147,7 +140,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 👏 Acknowledgments
 
 - Inspired by **Terraria** and other sandbox adventure games
-- Special thanks to the open-source game development community
 - Pixel art resources from various indie game asset creators
 
 ---
