@@ -6,7 +6,7 @@
 
 **A captivating 2D sandbox adventure game inspired by Terraria, where you build, mine, and explore an infinite underground world!**
 
-> 📸 **Add hero image here**: `screenshots/hero-banner.png` - A wide screenshot showing the main game world with character, buildings, and underground mining areas
+![hero-banner](./screenshots/main.png)
 
 ---
 
@@ -65,7 +65,7 @@ Create everything from simple tools to complex machinery:
 - **Building Materials** - Processed blocks and decorative items
 - **Furniture** - Chests, workbenches, decorative pieces
 
-> 📸 **Add crafting examples here**: `screenshots/crafting-examples.png` - Various crafted items
+![craft](./screenshots/craft.png)
 
 ---
 
